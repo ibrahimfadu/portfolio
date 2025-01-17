@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Social Media Management Services</title>
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Header -->
@@ -122,21 +121,22 @@
     <section id="portfolio" class="portfolio">
         <h2>Our Work</h2>
         <p>Check out some of our recent projects and success stories.</p>
-        <div class="portfolio-gallery">
-            <img src="image-1.jpg" alt="Portfolio Image 1">
-            <img src="image-2.jpg" alt="Portfolio Image 2">
-            <img src="image-3.jpg" alt="Portfolio Image 3">
-            <img src="image-4.jpg" alt="Portfolio Image 4">
-        </div>
-    </section>
+            <div class="portfolio-gallery">
+                <img src="{{ url_for('static', filename='images/image-1.jpg') }}" alt="Portfolio Image 1">
+                <img src="{{ url_for('static', filename='images/image-2.jpg') }}" alt="Portfolio Image 2">
+                <img src="{{ url_for('static', filename='images/image-3.jpg') }}" alt="Portfolio Image 3">
+                <img src="{{ url_for('static', filename='images/image-4.jpg') }}" alt="Portfolio Image 4">
+            </div>
+        </section>
 
     <!-- Contact Section -->
+     
     <section id="contact" class="contact">
         <h2>Contact Us</h2>
-        <form id="contact-form">
-            <input type="text" placeholder="Your Name" required>
-            <input type="email" placeholder="Your Email" required>
-            <textarea placeholder="Your Message" required></textarea>
+        <form id="contact-form" method="POST">
+            <input type="text" name="name" placeholder="Your Name" required>
+            <input type="email" name="email" placeholder="Your Email" required>
+            <textarea placeholder="Your Message" name="message" required></textarea>
             <button type="submit">Send Message</button>
         </form>
     </section>
@@ -152,7 +152,7 @@
         </div>
     </footer>
 
-</script>
+
 <style>
     body {
         font-family: 'Roboto', sans-serif;
@@ -201,7 +201,7 @@
         padding: 70px;
         text-align: center;
         overflow: hidden;
-        background: linear-gradient(180deg, rgba(26, 26, 29, 0.9), #1A1A1D), url("img2.jpeg");
+        background: linear-gradient(180deg, rgba(26, 26, 29, 0.9), #1A1A1D),url("{{ url_for('static', filename='images/img2.jpeg') }}");
         background-size: cover;
         background-position: center;
         color: #EAEAEA;
@@ -288,6 +288,7 @@
     display: flex; /* Make images align side by side */
     justify-content: space-between; /* Add space between images */
     gap: 10px; /* Optional: Adds space between the images */
+
     flex-wrap: wrap; /* Allows the images to wrap onto a new line on smaller screens */
 }
 
@@ -381,22 +382,63 @@
                 });
             });
         });
-     // Add event listener to the form
-    document.getElementById('contact-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent the form from submitting (page refresh)
+        document.getElementById('contact-form').addEventListener('submit', function(event) {
+    event.preventDefault();  // Prevent the form from submitting (page refresh)
 
-        // Display the alert message
+    // Get form data
+    const formData = new FormData(this);
+
+    // Send data using AJAX
+    fetch('/submit-email', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())  // Get the response text from Flask
+    .then(data => {
+        // Display the alert
         alert("Thank you for reaching out! We will contact you shortly.");
         
         // Reset the form after submission
         this.reset();
+        
+        // Optionally refresh the page to clear any changes or new data
+        window.location.reload(); // This will reload the page
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+});
+document.getElementById('contact-form').addEventListener('submit', function(event) {
+    event.preventDefault();  // Prevent default form submission
+
+    // Get form data
+    const formData = new FormData(this);
+
+    // Send data to Flask via fetch API (AJAX)
+    fetch('/submit-email', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        // Show alert upon successful submission
+        alert("Thank you for reaching out! We will contact you shortly.");
 
         // Scroll to the top of the page
         window.scrollTo({
             top: 0,
-            behavior: 'smooth' // Smooth scroll to the top
+            behavior: 'smooth'
         });
+
+        // Reset the form
+        this.reset();
+    })
+    .catch(error => {
+        console.error("Error:", error);
     });
+});
+
+
 
 </script>
 </body>
